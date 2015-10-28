@@ -82,13 +82,13 @@ namespace Lab1
             }
             else
             {
- 
+                string s = socketClient.ProcessingErorr(messagefromserver);
+                Warning thirdForm = new Warning(s);
+                thirdForm.ShowInTaskbar = false; //скрываем форму из панели задач
+                thirdForm.StartPosition = FormStartPosition.CenterScreen;//устанавливаем форму по центру экрана
+                thirdForm.ShowDialog(this);//указываем владельца для формы
             }
-            string s =socketClient.ProcessingErorr(messagefromserver);
-            Warning thirdForm = new Warning( s );
-            thirdForm.ShowInTaskbar = false; //скрываем форму из панели задач
-            thirdForm.StartPosition = FormStartPosition.CenterScreen;//устанавливаем форму по центру экрана
-            thirdForm.ShowDialog(this);//указываем владельца для формы
+            
             
             
         }
@@ -122,7 +122,91 @@ namespace Lab1
             messagefromserver = Serializer.ByteArrayToMessage(msgfromserver);
             //обрабатываем полученное Message
             bool b = socketClient.ProcessingMsg(messagefromserver);
-            //Не дописано!!!
+            
+            if (b)
+            {
+                //открываем форму для редактирования
+                Editor fouthForm = new Editor(messagefromserver.getArticle().getKey());
+                fouthForm.ShowInTaskbar = false; //скрываем форму из панели задач
+                fouthForm.StartPosition = FormStartPosition.CenterScreen;//устанавливаем форму по центру экрана
+                fouthForm.ShowDialog(this);//указываем владельца для формы
+                if (fouthForm.DialogResult == DialogResult.OK)
+                {
+                    //добавляем отредактированное содержимое
+                    article2.setContent(fouthForm.ReturnData());
+                    //изменяем код режима
+                    message.setCodeMode(4);
+                    //конвертируем объект message в массив байтов
+                    byte[] msg2 = Serializer.MessageToByteArray(message);
+                    //обращаемся к сокету клиента
+                    SocketClient socketClient2 = new SocketClient();
+                    //соединяемся с сервером
+                    SocketClient.ConnectToServer(11000, "172.18.30.55");
+                    //отправили сообщение серверу
+                    socketClient2.SendMsg(msg2);
+                    //получили ответ
+                    byte[] msgfromserver2 = socketClient2.GetMsg();
+                    //закрыли соединение
+                    socketClient2.SocketClose();
+                    Message messagefromserver2 = new Message();
+                    //преобразуем ответ сервера в объект Message
+                    messagefromserver2 = Serializer.ByteArrayToMessage(msgfromserver2);
+                    //обрабатываем полученное Message
+                    bool bb = socketClient2.ProcessingMsg(messagefromserver2);
+                    if (bb)
+                    {
+                        Good fifthForm = new Good("Сохранено!");
+                        fouthForm.ShowInTaskbar = false; //скрываем форму из панели задач
+                        fouthForm.StartPosition = FormStartPosition.CenterScreen;//устанавливаем форму по центру экрана
+                        fouthForm.ShowDialog(this);//указываем владельца для формы
+                    }
+                    else {
+                        Warning thirdForm = new Warning("Не удалось");
+                        thirdForm.ShowInTaskbar = false; //скрываем форму из панели задач
+                        thirdForm.StartPosition = FormStartPosition.CenterScreen;//устанавливаем форму по центру экрана
+                        thirdForm.ShowDialog(this);//указываем владельца для формы
+                    }
+
+                }
+                else if (fouthForm.DialogResult == DialogResult.Cancel)
+                {
+                    //изменяем код режима
+                    message.setCodeMode(3);
+                    //конвертируем объект message в массив байтов
+                    byte[] msg3 = Serializer.MessageToByteArray(message);
+                    //обращаемся к сокету клиента
+                    SocketClient socketClient3 = new SocketClient();
+                    //соединяемся с сервером
+                    SocketClient.ConnectToServer(11000, "172.18.30.55");
+                    //отправили сообщение серверу
+                    socketClient3.SendMsg(msg3);
+                    //получили ответ
+                    byte[] msgfromserver3 = socketClient3.GetMsg();
+                    //закрыли соединение
+                    socketClient3.SocketClose();
+                    Message messagefromserver3 = new Message();
+                    //преобразуем ответ сервера в объект Message
+                    messagefromserver3 = Serializer.ByteArrayToMessage(msgfromserver3);
+                    //обрабатываем полученное Message
+                    bool bb = socketClient3.ProcessingMsg(messagefromserver3);
+                    if (bb) { fouthForm.Close(); }
+                    else {
+                        Warning thirdForm = new Warning("Не удалось");
+                        thirdForm.ShowInTaskbar = false; //скрываем форму из панели задач
+                        thirdForm.StartPosition = FormStartPosition.CenterScreen;//устанавливаем форму по центру экрана
+                        thirdForm.ShowDialog(this);//указываем владельца для формы
+                    }
+                }
+            }
+            else
+            {
+                string s = socketClient.ProcessingErorr(messagefromserver);
+                Warning thirdForm = new Warning(s);
+                thirdForm.ShowInTaskbar = false; //скрываем форму из панели задач
+                thirdForm.StartPosition = FormStartPosition.CenterScreen;//устанавливаем форму по центру экрана
+                thirdForm.ShowDialog(this);//указываем владельца для формы
+            }
+            
             
 
         }
@@ -140,6 +224,107 @@ namespace Lab1
             message.setArticle(article3);
             message.setCodeMode(2);
            //не дописано!!!
+            //конвертируем объект message в массив байтов
+            byte[] msg = Serializer.MessageToByteArray(message);
+            //обращаемся к сокету клиента
+            SocketClient socketClient = new SocketClient();
+            //соединяемся с сервером
+            SocketClient.ConnectToServer(11000, "172.18.30.55");
+            //отправили сообщение серверу
+            socketClient.SendMsg(msg);
+            //получили ответ
+            byte[] msgfromserver = socketClient.GetMsg();
+            //закрыли соединение
+            socketClient.SocketClose();
+            Message messagefromserver = new Message();
+            //преобразуем ответ сервера в объект Message
+            messagefromserver = Serializer.ByteArrayToMessage(msgfromserver);
+            //обрабатываем полученное Message
+            bool b = socketClient.ProcessingMsg(messagefromserver);
+            if (b)
+            {
+                //открываем форму для создания (оно же редактирование пустой записи)
+                Editor fouthForm = new Editor(messagefromserver.getArticle().getKey());
+                fouthForm.ShowInTaskbar = false; //скрываем форму из панели задач
+                fouthForm.StartPosition = FormStartPosition.CenterScreen;//устанавливаем форму по центру экрана
+                fouthForm.ShowDialog(this);//указываем владельца для формы
+                if (fouthForm.DialogResult == DialogResult.OK)
+                {
+                    //добавляем отредактированное содержимое
+                    article3.setContent(fouthForm.ReturnData());
+                    //изменяем код режима
+                    message.setCodeMode(4);
+                    //конвертируем объект message в массив байтов
+                    byte[] msg2 = Serializer.MessageToByteArray(message);
+                    //обращаемся к сокету клиента
+                    SocketClient socketClient2 = new SocketClient();
+                    //соединяемся с сервером
+                    SocketClient.ConnectToServer(11000, "172.18.30.55");
+                    //отправили сообщение серверу
+                    socketClient2.SendMsg(msg2);
+                    //получили ответ
+                    byte[] msgfromserver2 = socketClient2.GetMsg();
+                    //закрыли соединение
+                    socketClient2.SocketClose();
+                    Message messagefromserver2 = new Message();
+                    //преобразуем ответ сервера в объект Message
+                    messagefromserver2 = Serializer.ByteArrayToMessage(msgfromserver2);
+                    //обрабатываем полученное Message
+                    bool bb = socketClient2.ProcessingMsg(messagefromserver2);
+                    if (bb)
+                    {
+                        Good fifthForm = new Good("Сохранено!");
+                        fouthForm.ShowInTaskbar = false; //скрываем форму из панели задач
+                        fouthForm.StartPosition = FormStartPosition.CenterScreen;//устанавливаем форму по центру экрана
+                        fouthForm.ShowDialog(this);//указываем владельца для формы
+                    }
+                    else
+                    {
+                        Warning thirdForm = new Warning("Не удалось");
+                        thirdForm.ShowInTaskbar = false; //скрываем форму из панели задач
+                        thirdForm.StartPosition = FormStartPosition.CenterScreen;//устанавливаем форму по центру экрана
+                        thirdForm.ShowDialog(this);//указываем владельца для формы
+                    }
+                }
+                else if (fouthForm.DialogResult == DialogResult.Cancel)
+                {
+                    //изменяем код режима
+                    message.setCodeMode(3);
+                    //конвертируем объект message в массив байтов
+                    byte[] msg3 = Serializer.MessageToByteArray(message);
+                    //обращаемся к сокету клиента
+                    SocketClient socketClient3 = new SocketClient();
+                    //соединяемся с сервером
+                    SocketClient.ConnectToServer(11000, "172.18.30.55");
+                    //отправили сообщение серверу
+                    socketClient3.SendMsg(msg3);
+                    //получили ответ
+                    byte[] msgfromserver3 = socketClient3.GetMsg();
+                    //закрыли соединение
+                    socketClient3.SocketClose();
+                    Message messagefromserver3 = new Message();
+                    //преобразуем ответ сервера в объект Message
+                    messagefromserver3 = Serializer.ByteArrayToMessage(msgfromserver3);
+                    //обрабатываем полученное Message
+                    bool bb = socketClient3.ProcessingMsg(messagefromserver3);
+                    if (bb) { fouthForm.Close(); }
+                    else
+                    {
+                        Warning thirdForm = new Warning("Не удалось");
+                        thirdForm.ShowInTaskbar = false; //скрываем форму из панели задач
+                        thirdForm.StartPosition = FormStartPosition.CenterScreen;//устанавливаем форму по центру экрана
+                        thirdForm.ShowDialog(this);//указываем владельца для формы
+                    }
+                }
+            }
+            else 
+            {
+                string s = socketClient.ProcessingErorr(messagefromserver);
+                Warning thirdForm = new Warning(s);
+                thirdForm.ShowInTaskbar = false; //скрываем форму из панели задач
+                thirdForm.StartPosition = FormStartPosition.CenterScreen;//устанавливаем форму по центру экрана
+                thirdForm.ShowDialog(this);//указываем владельца для формы
+            }
             
         }
     }
