@@ -12,9 +12,15 @@ namespace Lab1
 {
     public partial class Warning : Form
     {
-        public Warning()
+        public Warning( string erorr)
         {
             InitializeComponent();
+            label1.Text = erorr;
+        }
+
+        private void Warning_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }
