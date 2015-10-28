@@ -7,6 +7,8 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Net;
 using System.Collections.Generic;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace Server
 {
@@ -48,28 +50,57 @@ namespace Server
 
 
 
-        public void addArticle() { }
+        /*public void addArticle() { }
         public void addBackupCopy() { }
         public void addEditableCopy() { }
         public void deleteArticle() { }
         public void deleteBackupCopy() { }
         public void deleteEditableCopy() { }
         public Article getArticle(String name) { return new Article(name); }
-        /* public static void getMsg(Socket handler, String data) {
+        public static void getMsg(Socket handler, String data) {
              String data 
              byte[] bytes = new byte[1024];
              int bytesRec = handler.Receive(bytes);
              data += Encoding.UTF8.GetString(bytes, 0, bytesRec);
              processingMsg(data);
-         }*/
+         }
         public bool keepArticle() { return false; }
         public void memberOfBackup() { }
-        public void memberOfEditable() { }
-        public void processingMsg(String data) {
-            switch (data.Length)
+        public void memberOfEditable() { }*/
+        public Message ReadRequest(String key) { return new Message(); }
+        public Message СhangeRequest(String key) { return new Message(); }
+        public Message CreateRequest(String key){return new Message();}
+        public Message CompletionRequest(String key) { return new Message(); }
+        public Message SaveRequest(Article article) { return new Message(); }
+
+        public Message ProcessingMsg(Message msg) {
+            if (msg.getCodeStatus() == 200)
             {
-                //case
+                Message answer;
+                switch (msg.getCodeMode())
+                {
+                    case 0:
+                        answer = ReadRequest(msg.getArticle().getKey());
+                        break;
+                        
+                    case 1:
+                        answer=СhangeRequest(msg.getArticle().getKey());
+                        break;
+                    case 2:
+                        answer=CreateRequest(msg.getArticle().getKey());
+                        break;
+                    case 3:
+                        answer =CompletionRequest(msg.getArticle().getKey());
+                        break;
+                    case 4:
+                        answer = SaveRequest(msg.getArticle());
+                        break;
+                    default:
+                        break;
+                    
+                }
             }
+            return msg;
         }
         public void saveArticle() { }
 
@@ -153,7 +184,10 @@ namespace Server
                     
                     if (bytesRead > 0)
                     {
-                        
+                        Message msg=Serializer.ByteArrayToMessage(connection.buffer);
+                        Message answer=ProcessingMsg(msg);
+                        connection.buffer = Serializer.MessageToByteArray(answer);
+                        connection.Socket.Send(connection.buffer);
                     }
                     else if (bytesRead == 0) return;
                 }
@@ -174,49 +208,50 @@ namespace Server
                     connection);
             }
         }
+        
 
-       /* public static void ReadCallback(IAsyncResult ar)
-        {
-            String content = String.Empty;
+        /* public static void ReadCallback(IAsyncResult ar)
+         {
+             String content = String.Empty;
 
-            // Retrieve the state object and the handler socket
-            // from the asynchronous state object.
-            ConnectionInfo connection = (ConnectionInfo)ar.AsyncState;
-            Socket handler = state.Socket;
+             // Retrieve the state object and the handler socket
+             // from the asynchronous state object.
+             ConnectionInfo connection = (ConnectionInfo)ar.AsyncState;
+             Socket handler = state.Socket;
 
-            // Read data from the client socket. 
-            int bytesRead = handler.EndReceive(ar);
-            if (bytesRead > 0)
-            {
-                // There  might be more data, so store the data received so far.
-            }
-        }
-        public static void sendMsg(Socket hander, String data)
-        {
-            byte[] byteData = Encoding.ASCII.GetBytes(data);
-            hander.BeginSend(byteData, 0, byteData.Length, 0, new AsyncCallback(SendCallback), hander);
-        }
-        private static void SendCallback(IAsyncResult ar)
-        {
-            try
-            {
-                // Retrieve the socket from the state object.
-                Socket handler = (Socket)ar.AsyncState;
+             // Read data from the client socket. 
+             int bytesRead = handler.EndReceive(ar);
+             if (bytesRead > 0)
+             {
+                 // There  might be more data, so store the data received so far.
+             }
+         }
+         public static void sendMsg(Socket hander, String data)
+         {
+             byte[] byteData = Encoding.ASCII.GetBytes(data);
+             hander.BeginSend(byteData, 0, byteData.Length, 0, new AsyncCallback(SendCallback), hander);
+         }
+         private static void SendCallback(IAsyncResult ar)
+         {
+             try
+             {
+                 // Retrieve the socket from the state object.
+                 Socket handler = (Socket)ar.AsyncState;
 
-                // Complete sending the data to the remote device.
-                int bytesSent = handler.EndSend(ar);
-                Console.WriteLine("Sent {0} bytes to client.", bytesSent);
+                 // Complete sending the data to the remote device.
+                 int bytesSent = handler.EndSend(ar);
+                 Console.WriteLine("Sent {0} bytes to client.", bytesSent);
 
-                handler.Shutdown(SocketShutdown.Both);
-                handler.Close();
+                 handler.Shutdown(SocketShutdown.Both);
+                 handler.Close();
 
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.ToString());
-            }
+             }
+             catch (Exception e)
+             {
+                 Console.WriteLine(e.ToString());
+             }
 
 
-        }*/
+         }*/
     }
 }

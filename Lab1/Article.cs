@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace Server
 {
+    [Serializable]
     class Article
     {
         public Article(String key) { Key = key; }

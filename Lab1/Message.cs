@@ -6,27 +6,28 @@ using System.Threading.Tasks;
 
 namespace Server
 {
+    [Serializable]
     class Message
     {
         private
-            Article mArticle;
+            Article Article;
             int Code_mode;
             int Code_status;
-            String Key_article;
             String Name_addressee;
             String Name_sender;
         public Message(){ }
-        public void setArticle(Article article) { mArticle = article; }
-        public void setKey(String key) { Key_article = key; }
+        public void setArticle(Article article) { Article = article; }
+        
         public void setCodeMode(int code) { Code_mode = code; }
         public void setCodeStatus(int code) { Code_status = code; }
         public void setAddressee(String addressee) { Name_addressee = addressee; }
         public void setSender(String sender) { Name_sender = sender; }
 
-        public Article getArticle() { return mArticle; }
-        public String getKey() { return Key_article; }
+        public Article getArticle() { return Article; }
         public String getAdressee() { return Name_addressee; }
         public String getSender() { return Name_sender; }
+        public int getCodeMode() { return Code_mode; }
+        public int getCodeStatus() { return Code_status; }
     }
 
     /*
