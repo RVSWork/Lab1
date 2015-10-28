@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace Server
 {
-    class Serializer
+    static class Serializer
     {
-        private static Message ByteArrayToMessage(byte[] arrBytes)
+        public static Message ByteArrayToMessage(byte[] arrBytes)
         {
             MemoryStream memStream = new MemoryStream();
             BinaryFormatter binForm = new BinaryFormatter();
@@ -19,7 +19,7 @@ namespace Server
             Message obj = (Message)binForm.Deserialize(memStream);
             return obj;
         }
-        private static byte[] MessageToByteArray(Message obj)
+        public static byte[] MessageToByteArray(Message obj)
         {
             if (obj == null)
                 return null;
