@@ -48,17 +48,34 @@ namespace Lab1
             /*if (message.IndexOf("<TheEnd>") == -1)
                 SendMessageFromSocket(port, message);*/
 
+            
+        }
+        public void SocketClose() //закрываем соединение
+        {
             // Освобождаем сокет
             senderclient.Shutdown(SocketShutdown.Both);
             senderclient.Close();
         }
-        public string ProcessingMsgToRead( Message msg)
+
+        public bool ProcessingMsg(Message msg)
         {
             if (msg.getCodeStatus() == 200)
-            { return msg.getArticle().getContent(); }
-            else if (msg.getCodeStatus() == 404)
+                return true;
+            else return false;
+        }
+        public string ProcessingErorr( Message msg)
+        {
+            if (msg.getCodeStatus() == 404)
             { return "Запись не сущуствует"; }
+            else if (msg.getCodeStatus() == 405)
+            {
+                return "Запись уже существует";
+            }
+            else if (msg.getCodeStatus() == 406)
+            { return "В настоящий момент запись нельзя редактировать, попробуйте позднее"; }
             else return "Неизвестная ошибка";
         }
+
+        
     }
 }
