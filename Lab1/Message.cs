@@ -15,7 +15,15 @@ namespace Server
             int Code_status;
             String Name_addressee;
             String Name_sender;
-        public Message(){ }
+        public Message(){
+            Code_status = 200;
+        }
+        public Message(Article article, int code_mode)
+        {
+            Article = article;
+            Code_mode = code_mode;
+            Code_status = 200;
+        }
         public void setArticle(Article article) { Article = article; }
         
         public void setCodeMode(int code) { Code_mode = code; }
