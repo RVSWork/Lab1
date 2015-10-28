@@ -27,8 +27,8 @@ namespace Server
     class Server
     {
         public static ManualResetEvent allDone = new ManualResetEvent(false);
-        private Hashtable List_backup_copies;
-        private Hashtable List_editable_copies;
+        private Dictionary<String,Article> BackupCopies;
+        private Dictionary<String, Article> EditableCopies;
 
         private class ConnectionInfo
         {
@@ -42,8 +42,8 @@ namespace Server
         private List<ConnectionInfo> connections;
         public Server() {
 
-            List_backup_copies = new Hashtable();
-            List_editable_copies = new Hashtable();
+            BackupCopies = new Dictionary<String, Article>();
+            EditableCopies = new Dictionary<String, Article>();
             //state = new StateObject();
             connections = new List<ConnectionInfo>();
         }
@@ -67,11 +67,101 @@ namespace Server
         public bool keepArticle() { return false; }
         public void memberOfBackup() { }
         public void memberOfEditable() { }*/
-        public Message ReadRequest(String key) { return new Message(); }
-        public Message СhangeRequest(String key) { return new Message(); }
-        public Message CreateRequest(String key){return new Message();}
-        public Message CompletionRequest(String key) { return new Message(); }
-        public Message SaveRequest(Article article) { return new Message(); }
+        public Article getAticleFromDataBase(String key)
+        {
+            // Лера, твой ход. Чтение из базы данных и помещение в Article
+            return new Article(key);
+        }
+        public void saveArticleInDataBase(Article article)
+        {
+            // Лера, твой ход. Сохрани статью в базе данных
+        }
+        public bool ArticleExistInDataBase(String key)
+        {
+            // Лера, твой ход. Проверь сущесвует ли запись
+            return true;
+        }
+        public bool MemberOfBackup(String key) { return BackupCopies.ContainsKey(key); }
+        
+        public Message ReadRequest(String key)
+        {
+            Article article=null;
+            Message msg = new Message();
+            if (ArticleExistInDataBase(key))
+            {
+                if (MemberOfBackup(key))
+                {
+                    article = new Article(key);
+                    article=BackupCopies[key];
+                }
+                else article = getAticleFromDataBase(key);
+               
+            }
+            else msg.setCodeStatus(404);
+            msg.setArticle(article);
+            return msg;
+        }
+        public Message СhangeRequest(String key)
+        {
+            Article article=null;
+            Message msg = new Message();
+            if (ArticleExistInDataBase(key))
+            {
+                if (!MemberOfBackup(key))
+                {
+                    article = getAticleFromDataBase(key);
+                    BackupCopies.Add(key, article);
+                    EditableCopies.Add(key, article);
+                }
+                else msg.setCodeStatus(406);
+                
+            }
+            else msg.setCodeStatus(404);
+            msg.setArticle(article);
+            return msg;
+        }
+        public Message CreateRequest(String key)
+        {
+            Article article = null;
+            Message msg = new Message();
+            if (!ArticleExistInDataBase(key))
+            {
+                if (!EditableCopies.ContainsKey(key))
+                {
+                    article = new Article(key);
+                    article.setContent(String.Empty);
+                    EditableCopies.Add(key, article);
+                }
+                else msg.setCodeStatus(406);
+            }
+            else msg.setCodeStatus(405);
+            msg.setArticle(article);
+            return msg;
+        }
+        public Message CompletionRequest(String key)
+        {
+            Message msg = new Message();
+            if (EditableCopies.ContainsKey(key))
+            {
+                Article article = EditableCopies[key];
+                saveArticleInDataBase(article);
+                if (BackupCopies.ContainsKey(key))
+                    BackupCopies.Remove(key);
+                EditableCopies.Remove(key);
+            }
+            else msg.setCodeStatus(404);
+            return msg;
+        }
+        public Message SaveRequest(Article article)
+        {
+            Message msg = new Message();
+            if (EditableCopies.ContainsKey(article.getKey()))
+            {
+                EditableCopies[article.getKey()] = article;
+            }
+            else msg.setCodeStatus(404);
+            return msg;
+        }
 
         public Message ProcessingMsg(Message msg) {
             if (msg.getCodeStatus() == 200)
