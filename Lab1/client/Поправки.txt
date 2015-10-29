@@ -1,0 +1,8 @@
+Были изменены файлы Form1.cs
+-- В основном методы обработки 6 и 7 кнопки, добавлено новое пространство Communication
+ Form1.Designer.cs
+--Поменяла местами обработчик 6 и 7 кнопки. Ибо перепутаны.
+Serializer.cs Article.cs, Message.cs 
+--Вынесены в отдельный namespace Communication
+Serializer.cs 
+--Лучше полностью перезапиши
