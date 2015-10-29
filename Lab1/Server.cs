@@ -9,79 +9,174 @@ using System.Net;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
+using Communication;
 
 namespace Server
-{
-    public class StateObject
-    {
-        // Client  socket.
-        public Socket workSocket = null;
-        // Size of receive buffer.
-        public const int BufferSize = 1024;
-        // Receive buffer.
-        public byte[] buffer = new byte[BufferSize];
-        // Received data string.
-        public StringBuilder sb = new StringBuilder();
-    }
+{ 
 
     class Server
     {
-        public static ManualResetEvent allDone = new ManualResetEvent(false);
-        private Dictionary<String,Article> BackupCopies;
-        private Dictionary<String, Article> EditableCopies;
+        public static ManualResetEvent allDone = new ManualResetEvent(false); //Уведомляет один или более ожидающих потоков о том, что произошло событие.
+        private Dictionary<String,Article> BackupCopies; //Содержит резевные копии статей
+        private Dictionary<String, Article> EditableCopies;//Содержит копии редактируемых статей
+        private Dictionary<String, Article> Store;
 
-        private class ConnectionInfo
+        private class ConnectionInfo //Вложеный класс который содержит информацию о соединении
         {
-            public Socket Socket;
-            public Thread Thread;
-            public const int BufferSize = 1024;
-            public byte[] buffer = new byte[BufferSize];
-            public StringBuilder sb = new StringBuilder();
+            public Socket Socket; //Сокет соединения
+            public Thread Thread;//Поток соединения
+            public const int BufferSize = 1024;//Размер буфера 
+            public byte[] buffer = new byte[BufferSize];//Буфер
         }
-        private Thread acceptThread;
-        private List<ConnectionInfo> connections;
+
+       // private Thread acceptThread;
+        private List<ConnectionInfo> connections;//
+
         public Server() {
 
             BackupCopies = new Dictionary<String, Article>();
             EditableCopies = new Dictionary<String, Article>();
-            //state = new StateObject();
             connections = new List<ConnectionInfo>();
+            Store = new Dictionary<String, Article>();
         }
 
+        //Функция которая настраивает соединение, по которому будет слушать 
+        public void StartListening() 
+        {
+            //byte[] bytes = new Byte[1024];
+
+            IPHostEntry ipHost = Dns.GetHostEntry("localhost");// Разрешает имя узла или IP - адрес в экземпляр
 
 
-        /*public void addArticle() { }
-        public void addBackupCopy() { }
-        public void addEditableCopy() { }
-        public void deleteArticle() { }
-        public void deleteBackupCopy() { }
-        public void deleteEditableCopy() { }
-        public Article getArticle(String name) { return new Article(name); }
-        public static void getMsg(Socket handler, String data) {
-             String data 
-             byte[] bytes = new byte[1024];
-             int bytesRec = handler.Receive(bytes);
-             data += Encoding.UTF8.GetString(bytes, 0, bytesRec);
-             processingMsg(data);
-         }
-        public bool keepArticle() { return false; }
-        public void memberOfBackup() { }
-        public void memberOfEditable() { }*/
-        public Article getAticleFromDataBase(String key)
-        {
-            // Лера, твой ход. Чтение из базы данных и помещение в Article
-            return new Article(key);
+            IPAddress ipAddr = ipHost.AddressList[0];//Получает первый ip связанный с этим узлом
+            IPEndPoint ipEndPoint = new IPEndPoint(ipAddr, 11000); // Представляет сетевую конечную точка в виде IP-адреса и номера порта
+
+            Socket listener = new Socket(ipAddr.AddressFamily,
+                SocketType.Stream, ProtocolType.Tcp);//Инициализирует новый экземпляр класса Socket, используя заданные семейство адресов, тип сокета и протокол.
+            
+            try
+            {
+                listener.Bind(ipEndPoint); //Привязывание сокета к прослушиваемому порту
+                listener.Listen(100); //Устанавливает объект Socket в состояние прослушивания. Максимальное кол-во соединений 100
+ 
+                while (true)
+                {
+                    allDone.Reset(); //Задает несигнальное состояние события, вызывая блокирование потоков.
+
+                    // Start an asynchronous socket to listen for connections.
+                    Console.WriteLine("Waiting for a connection...");
+                    listener.BeginAccept(
+                        new AsyncCallback(AcceptCallback),
+                        listener);
+
+                    // Дождитесь соединения, прежде чем продолжить.
+                    allDone.WaitOne();
+                }
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+            }
+
+            Console.WriteLine("\nPress ENTER to continue...");
+            Console.Read();
         }
-        public void saveArticleInDataBase(Article article)
+
+        public void AcceptCallback(IAsyncResult ar)
         {
-            // Лера, твой ход. Сохрани статью в базе данных
+            // Signal the main thread to continue.
+            allDone.Set();
+
+            // Get the socket that handles the client request.
+            Socket listener = (Socket)ar.AsyncState;
+            Socket handler = listener.EndAccept(ar);
+            ConnectionInfo connection = new ConnectionInfo();
+            connection.Socket = handler;
+
+            connection.Thread = new Thread(ProcessConnection);
+            connection.Thread.IsBackground = true;
+            connection.Thread.Start(connection);
+            lock (connections) connections.Add(connection);
+
+            // Create the state object.
+            //state = new StateObject();
+            //state.workSocket = handler;
+            /*handler.BeginReceive(connection.buffer, 0, ConnectionInfo.BufferSize, 0,
+                new AsyncCallback(ReadCallback), connection);*/
         }
-        public bool ArticleExistInDataBase(String key)
+
+        private void ProcessConnection(object state)
         {
-            // Лера, твой ход. Проверь сущесвует ли запись
-            return true;
+            ConnectionInfo connection = (ConnectionInfo)state;
+            //byte[] buffer = new byte[255];
+            Console.WriteLine("Есть соединение");
+            try
+            {
+                while (true)
+                {
+                    int bytesRead = connection.Socket.Receive(
+                    connection.buffer);
+
+                    if (bytesRead > 0)
+                    {
+                        Message msg =Serializer.ByteArrayToMessage(connection.buffer);
+                        Console.WriteLine(msg.getArticle().getKey());
+                        Console.WriteLine(msg.getCodeMode());
+                        Message answer =ProcessingMsg(msg);
+                       // Console.WriteLine(answer.getCodeStatus());
+                        connection.buffer = Serializer.MessageToByteArray(answer);
+                        connection.Socket.Send(connection.buffer);
+                    }
+                    else if (bytesRead == 0) return;
+                }
+            }
+            catch (SocketException exc)
+            {
+                Console.WriteLine("Socket exception: " +
+                    exc.SocketErrorCode);
+            }
+            catch (Exception exc)
+            {
+                Console.WriteLine("Exception: " + exc);
+            }
+            finally
+            {
+                connection.Socket.Close();
+                lock (connections) connections.Remove(
+                    connection);
+            }
         }
-        public bool MemberOfBackup(String key) { return BackupCopies.ContainsKey(key); }
+        public Message ProcessingMsg(Message msg)
+        {
+            Message answer=null;
+            if (msg.getCodeStatus() == 200)
+            {
+                switch (msg.getCodeMode())
+                {
+                    case 0:
+                        answer = ReadRequest(msg.getArticle().getKey());
+                        break;
+
+                    case 1:
+                        answer = СhangeRequest(msg.getArticle().getKey(), msg.getSender());
+                        break;
+                    case 2:
+                        answer = CreateRequest(msg.getArticle().getKey());
+                        break;
+                    case 3:
+                        answer = CompletionRequest(msg.getArticle().getKey());
+                        break;
+                    case 4:
+                        answer = SaveRequest(msg.getArticle());
+                        break;
+                    default:
+                        break;
+
+                }
+            }
+            return answer;
+        }
         
         public Message ReadRequest(String key)
         {
@@ -101,7 +196,7 @@ namespace Server
             msg.setArticle(article);
             return msg;
         }
-        public Message СhangeRequest(String key)
+        public Message СhangeRequest(String key, String autor)
         {
             Article article=null;
             Message msg = new Message();
@@ -163,143 +258,49 @@ namespace Server
             return msg;
         }
 
-        public Message ProcessingMsg(Message msg) {
-            if (msg.getCodeStatus() == 200)
-            {
-                Message answer;
-                switch (msg.getCodeMode())
-                {
-                    case 0:
-                        answer = ReadRequest(msg.getArticle().getKey());
-                        break;
-                        
-                    case 1:
-                        answer=СhangeRequest(msg.getArticle().getKey());
-                        break;
-                    case 2:
-                        answer=CreateRequest(msg.getArticle().getKey());
-                        break;
-                    case 3:
-                        answer =CompletionRequest(msg.getArticle().getKey());
-                        break;
-                    case 4:
-                        answer = SaveRequest(msg.getArticle());
-                        break;
-                    default:
-                        break;
-                    
-                }
-            }
-            return msg;
-        }
-        public void saveArticle() { }
-
-        public void StartListening()
+        public Article getAticleFromDataBase(String key)
         {
-            byte[] bytes = new Byte[1024];
-
-            // Establish the local endpoint for the socket.
-            // The DNS name of the computer
-            IPHostEntry ipHostInfo = Dns.GetHostEntry("localhost");
-            IPAddress ipAddress = ipHostInfo.AddressList[0];
-            IPEndPoint localEndPoint = new IPEndPoint(ipAddress, 11000);
-
-            // Create a TCP/IP socket.
-            Socket listener = new Socket(AddressFamily.InterNetwork,
-                SocketType.Stream, ProtocolType.Tcp);
-
-            // Bind the socket to the local endpoint and listen for incoming connections.
-            try
-            {
-                listener.Bind(localEndPoint);
-                listener.Listen(100);
-
-                while (true)
-                {
-                    // Set the event to nonsignaled state.
-                    allDone.Reset();
-
-                    // Start an asynchronous socket to listen for connections.
-                    Console.WriteLine("Waiting for a connection...");
-                    listener.BeginAccept(
-                        new AsyncCallback(AcceptCallback),
-                        listener);
-
-                    // Wait until a connection is made before continuing.
-                    allDone.WaitOne();
-                }
-
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.ToString());
-            }
-
-            Console.WriteLine("\nPress ENTER to continue...");
-            Console.Read();
+            // Лера, твой ход. Чтение из базы данных и помещение в Article
+            //Article article = new Article(key);
+            //article.setContent("ura");
+            if (Store.ContainsKey(key))
+                return Store[key];
+            else return null;
         }
-        public void AcceptCallback(IAsyncResult ar)
+        public void saveArticleInDataBase(Article article)
         {
-            // Signal the main thread to continue.
-            allDone.Set();
-
-            // Get the socket that handles the client request.
-            Socket listener = (Socket)ar.AsyncState;
-            Socket handler = listener.EndAccept(ar);
-            ConnectionInfo connection = new ConnectionInfo();
-            connection.Socket = handler;
-
-            connection.Thread = new Thread(ProcessConnection);
-            connection.Thread.IsBackground = true;
-            connection.Thread.Start(connection);
-            lock(connections) connections.Add(connection);
-
-            // Create the state object.
-            //state = new StateObject();
-            //state.workSocket = handler;
-            /*handler.BeginReceive(connection.buffer, 0, ConnectionInfo.BufferSize, 0,
-                new AsyncCallback(ReadCallback), connection);*/
+            // Лера, твой ход. Сохрани статью в базе данных
+            if (Store.ContainsKey(article.getKey()))
+                Store[article.getKey()] = article;
+            else
+            Store.Add(article.getKey(), article);
         }
-
-        private void ProcessConnection(object state)
+        public bool ArticleExistInDataBase(String key)
         {
-            ConnectionInfo connection = (ConnectionInfo)state;
-            //byte[] buffer = new byte[255];
-            try
-            {
-                while (true)
-                {
-                    int bytesRead = connection.Socket.Receive(
-                    connection.buffer);
-                    
-                    if (bytesRead > 0)
-                    {
-                        Message msg=Serializer.ByteArrayToMessage(connection.buffer);
-                        Message answer=ProcessingMsg(msg);
-                        connection.buffer = Serializer.MessageToByteArray(answer);
-                        connection.Socket.Send(connection.buffer);
-                    }
-                    else if (bytesRead == 0) return;
-                }
-            }
-            catch (SocketException exc)
-            {
-                Console.WriteLine("Socket exception: " +
-                    exc.SocketErrorCode);
-            }
-            catch (Exception exc)
-            {
-                Console.WriteLine("Exception: " + exc);
-            }
-            finally
-            {
-                connection.Socket.Close();
-                lock (connections) connections.Remove(
-                    connection);
-            }
+            // Лера, твой ход. Проверь сущесвует ли запись
+            return Store.ContainsKey(key);
         }
-        
 
+        public bool MemberOfBackup(String key) { return BackupCopies.ContainsKey(key); }
+
+
+        /*public void addArticle() { }
+        public void addBackupCopy() { }
+        public void addEditableCopy() { }
+        public void deleteArticle() { }
+        public void deleteBackupCopy() { }
+        public void deleteEditableCopy() { }
+        public Article getArticle(String name) { return new Article(name); }
+        public static void getMsg(Socket handler, String data) {
+             String data 
+             byte[] bytes = new byte[1024];
+             int bytesRec = handler.Receive(bytes);
+             data += Encoding.UTF8.GetString(bytes, 0, bytesRec);
+             processingMsg(data);
+         }
+        public bool keepArticle() { return false; }
+        public void memberOfBackup() { }
+        public void memberOfEditable() { }*/
         /* public static void ReadCallback(IAsyncResult ar)
          {
              String content = String.Empty;

@@ -4,18 +4,19 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Server
+namespace Communication
 {
     [Serializable]
     class Message
     {
         private
-            Article Article;
-            int Code_mode;
-            int Code_status;
-            String Name_addressee;
-            String Name_sender;
-        public Message(){
+         Article Article;
+        int Code_mode;
+        int Code_status;
+        String Name_addressee;
+        String Name_sender;
+        public Message()
+        {
             Code_status = 200;
         }
         public Message(Article article, int code_mode)
@@ -25,7 +26,7 @@ namespace Server
             Code_status = 200;
         }
         public void setArticle(Article article) { Article = article; }
-        
+
         public void setCodeMode(int code) { Code_mode = code; }
         public void setCodeStatus(int code) { Code_status = code; }
         public void setAddressee(String addressee) { Name_addressee = addressee; }
