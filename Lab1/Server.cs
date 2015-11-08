@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using Communication;
+using System.IO.Pipes;
 
 namespace Server
 { 
@@ -20,6 +21,8 @@ namespace Server
         private Dictionary<String,Article> BackupCopies; //Содержит резевные копии статей
         private Dictionary<String, Article> EditableCopies;//Содержит копии редактируемых статей
         private Dictionary<String, Article> Store;
+        private List<ConnectionInfo> connections;//
+        
 
         private class ConnectionInfo //Вложеный класс который содержит информацию о соединении
         {
@@ -28,9 +31,10 @@ namespace Server
             public const int BufferSize = 1024;//Размер буфера 
             public byte[] buffer = new byte[BufferSize];//Буфер
         }
+            
 
-       // private Thread acceptThread;
-        private List<ConnectionInfo> connections;//
+            // private Thread acceptThread;
+            
 
         public Server() {
 
@@ -40,51 +44,122 @@ namespace Server
             Store = new Dictionary<String, Article>();
         }
 
-        //Функция которая настраивает соединение, по которому будет слушать 
-        public void StartListening() 
+
+
+        // Тут новые классы и методы для работы с Pipe
+
+        private List<ConnectionInfoPipe> connectionsPipe;//
+        private class ConnectionInfoPipe //Вложеный класс который содержит информацию о соединении
         {
-            //byte[] bytes = new Byte[1024];
-
-            IPHostEntry ipHost = Dns.GetHostEntry("localhost");// Разрешает имя узла или IP - адрес в экземпляр
-
-
-            IPAddress ipAddr = ipHost.AddressList[0];//Получает первый ip связанный с этим узлом
-            IPEndPoint ipEndPoint = new IPEndPoint(ipAddr, 11000); // Представляет сетевую конечную точка в виде IP-адреса и номера порта
-
-            Socket listener = new Socket(ipAddr.AddressFamily,
-                SocketType.Stream, ProtocolType.Tcp);//Инициализирует новый экземпляр класса Socket, используя заданные семейство адресов, тип сокета и протокол.
-            
-            try
-            {
-                listener.Bind(ipEndPoint); //Привязывание сокета к прослушиваемому порту
-                listener.Listen(100); //Устанавливает объект Socket в состояние прослушивания. Максимальное кол-во соединений 100
- 
+            public NamedPipeServerStream serverPipe; //Канал соединения
+            public Thread Thread;//Поток соединения
+            public const int BufferSize = 1024;//Размер буфера 
+            public byte[] buffer = new byte[BufferSize];//Буфер
+        }
+        //Функция которая настраивает соединение, по которому будет слушать 
+        public void StartListeningPipe()
+        {
+               
                 while (true)
                 {
-                    allDone.Reset(); //Задает несигнальное состояние события, вызывая блокирование потоков.
-
-                    // Start an asynchronous socket to listen for connections.
-                    Console.WriteLine("Waiting for a connection...");
-                    listener.BeginAccept(
-                        new AsyncCallback(AcceptCallback),
-                        listener);
-
-                    // Дождитесь соединения, прежде чем продолжить.
-                    allDone.WaitOne();
+                   
+                        NamedPipeServerStream pipeServer =
+                        new NamedPipeServerStream("testpipe", PipeDirection.InOut);
+                        Console.Write("Waiting for client connection...");
+                        pipeServer.WaitForConnection();
+                        Console.WriteLine("Client connected.");
+                        ConnectionInfoPipe connection = new ConnectionInfoPipe();
+                        connection.serverPipe = pipeServer;
+                        connection.Thread = new Thread(ProcessConnectionPipe);
+                        connection.Thread.IsBackground = true;
+                        connection.Thread.Start(connection);
+                        lock (connectionsPipe) connectionsPipe.Add(connection);
                 }
-
-            }
-            catch (Exception e)
+            
+            Console.WriteLine("\nPress ENTER to continue...");
+            Console.Read();
+        }
+        public void ProcessConnectionPipe(Object status)
+        {
+            ConnectionInfoPipe connection = (ConnectionInfoPipe)status;
+            int max = connection.buffer.Length;
+            
+            Console.WriteLine("Есть соединение");
+            try
             {
-                Console.WriteLine(e.ToString());
+                int bytesRead = connection.serverPipe.Read(connection.buffer, 0, max);
+                if (bytesRead > 0)
+                {
+                    Message msg = Serializer.ByteArrayToMessage(connection.buffer);
+                    Console.WriteLine(msg.getArticle().getKey());
+                    Console.WriteLine(msg.getCodeMode());
+                    Message answer = ProcessingMsg(msg);
+                    connection.buffer = Serializer.MessageToByteArray(answer);
+                    connection.serverPipe.Write(connection.buffer, 0, max);
+                }
+                else if (bytesRead == 0) return;
             }
+            catch (Exception exc)
+            {
+                Console.WriteLine("Exception: " + exc);
+            }
+            finally
+            {
+                connection.serverPipe.Close();
+                lock (connectionsPipe) connectionsPipe.Remove(
+                    connection);
+            }
+        }
+
+
+        // Тут закончились Pipe
+
+
+
+        public void StartListening()
+    {
+        //byte[] bytes = new Byte[1024];
+
+        IPHostEntry ipHost = Dns.GetHostEntry("localhost");// Разрешает имя узла или IP - адрес в экземпляр
+
+
+        IPAddress ipAddr = ipHost.AddressList[0];//Получает первый ip связанный с этим узлом
+        IPEndPoint ipEndPoint = new IPEndPoint(ipAddr, 11000); // Представляет сетевую конечную точка в виде IP-адреса и номера порта
+
+        Socket listener = new Socket(ipAddr.AddressFamily,
+            SocketType.Stream, ProtocolType.Tcp);//Инициализирует новый экземпляр класса Socket, используя заданные семейство адресов, тип сокета и протокол.
+            
+                try
+                {
+                    listener.Bind(ipEndPoint); //Привязывание сокета к прослушиваемому порту
+                    listener.Listen(100); //Устанавливает объект Socket в состояние прослушивания. Максимальное кол-во соединений 100
+ 
+                    while (true)
+                    {
+                        allDone.Reset(); //Задает несигнальное состояние события, вызывая блокирование потоков.
+
+                        // Start an asynchronous socket to listen for connections.
+                        Console.WriteLine("Waiting for a connection...");
+                        listener.BeginAccept(
+                            new AsyncCallback(AcceptCallback),
+                            listener);
+
+                        // Дождитесь соединения, прежде чем продолжить.
+                        allDone.WaitOne();
+                    }
+
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.ToString());
+                }
 
             Console.WriteLine("\nPress ENTER to continue...");
             Console.Read();
         }
 
-        public void AcceptCallback(IAsyncResult ar)
-        {
+public void AcceptCallback(IAsyncResult ar)
+{
             // Signal the main thread to continue.
             allDone.Set();
 
@@ -99,37 +174,35 @@ namespace Server
             connection.Thread.Start(connection);
             lock (connections) connections.Add(connection);
 
-            // Create the state object.
-            //state = new StateObject();
-            //state.workSocket = handler;
-            /*handler.BeginReceive(connection.buffer, 0, ConnectionInfo.BufferSize, 0,
-                new AsyncCallback(ReadCallback), connection);*/
-        }
+    // Create the state object.
+    //state = new StateObject();
+    //state.workSocket = handler;
+    /*handler.BeginReceive(connection.buffer, 0, ConnectionInfo.BufferSize, 0,
+        new AsyncCallback(ReadCallback), connection);*/
+}
+
 
         private void ProcessConnection(object state)
         {
-            ConnectionInfo connection = (ConnectionInfo)state;
-            //byte[] buffer = new byte[255];
-            Console.WriteLine("Есть соединение");
-            try
-            {
-                while (true)
-                {
-                    int bytesRead = connection.Socket.Receive(
-                    connection.buffer);
+             ConnectionInfo connection = (ConnectionInfo)state;
+            try { 
+                  while (true)
+                  {
+                      int bytesRead = connection.Socket.Receive(
+                      connection.buffer);
 
-                    if (bytesRead > 0)
-                    {
-                        Message msg =Serializer.ByteArrayToMessage(connection.buffer);
-                        Console.WriteLine(msg.getArticle().getKey());
-                        Console.WriteLine(msg.getCodeMode());
-                        Message answer =ProcessingMsg(msg);
-                       // Console.WriteLine(answer.getCodeStatus());
-                        connection.buffer = Serializer.MessageToByteArray(answer);
-                        connection.Socket.Send(connection.buffer);
-                    }
-                    else if (bytesRead == 0) return;
-                }
+                      if (bytesRead > 0)
+                      {
+                          Message msg =Serializer.ByteArrayToMessage(connection.buffer);
+                          Console.WriteLine(msg.getArticle().getKey());
+                          Console.WriteLine(msg.getCodeMode());
+                          Message answer =ProcessingMsg(msg);
+                         // Console.WriteLine(answer.getCodeStatus());
+                          connection.buffer = Serializer.MessageToByteArray(answer);
+                          connection.Socket.Send(connection.buffer);
+                      }
+                      else if (bytesRead == 0) return;
+                  }
             }
             catch (SocketException exc)
             {
@@ -174,6 +247,14 @@ namespace Server
                         break;
 
                 }
+            }
+            else
+            {
+                String key = msg.getArticle().getKey();
+                if (EditableCopies.ContainsKey(key))
+                { EditableCopies.Remove(key); }
+                if (BackupCopies.ContainsKey(key))
+                    BackupCopies.Remove(key);
             }
             return answer;
         }
@@ -272,7 +353,7 @@ namespace Server
             // Лера, твой ход. Сохрани статью в базе данных
             if (Store.ContainsKey(article.getKey()))
                 Store[article.getKey()] = article;
-            else
+            else 
             Store.Add(article.getKey(), article);
         }
         public bool ArticleExistInDataBase(String key)
