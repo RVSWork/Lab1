@@ -1,2 +1,0 @@
-vangogh.xml
-klimt.xml
