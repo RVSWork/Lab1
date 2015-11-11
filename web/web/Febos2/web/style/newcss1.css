@@ -1,0 +1,42 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : 03.10.2015, 22:48:26
+@import "newcss1.css";
+    Author     : SofySmo
+*/
+div.product-attributs#shot_info{
+    display:block;
+    //float:righ;
+   // margin-right: 50px;
+    //margin-top: 0px;
+    //margin-left: 10px;
+   // vertical-align:top;
+
+}
+.product{
+     float: left;
+     margin: 15px;
+     border:1px #ac7fa8;
+     padding: 12px;
+     border: 1px #ac7fa8 solid;
+     border-radius: 5px;
+     width: 200px;
+     //vertical-align: top;
+     display: block;
+     
+    //display: inline-block;
+ }
+ .product p
+ {
+     font-size: 14px;
+     color:gray;
+     margin: 2px;  
+    width: 200px;
+     white-space: normal;
+ }
+
+

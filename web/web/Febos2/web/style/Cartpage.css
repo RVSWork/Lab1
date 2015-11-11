@@ -1,0 +1,61 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : 07.11.2015, 18:06:08
+    Author     : SofySmo
+*/
+.choose_product
+{
+    display:block;
+    width: 200px;
+}
+.choose_attributs
+{
+    display: block;
+    //float: right;
+    //vertical-align:central;
+    //margin-right: 50px;
+}
+div.product-attributs strong{
+    background:none;
+}
+.cross
+{
+    font-family: 'Franklin Gothic Demi Cond', arial;
+    float:right;
+    font-size: 15px;
+    margin-bottom: 5px;
+    font-weight:bold;
+    color:#514f51;
+}
+.cross:hover
+{
+    color:#383838;
+    font-size:16px;
+}
+#result
+{
+    font-size: 30px;
+    display:inline-block;
+     width: 758px;
+     border-radius: 5px;
+     border:1px #e9e9e9 solid;
+     background: #e9e9e9;
+     padding: 10px;
+}
+h2{
+    margin-left:20px;
+    margin-top: 40px;
+    color:#514f51;
+}
+.count::-webkit-inner-spin-button { 
+  opacity: 1;
+ 
+}
+.count
+{
+  width: 50px;   
+}

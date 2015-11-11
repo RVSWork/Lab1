@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<java version="1.8.0_60" class="java.beans.XMLDecoder">
+ <array class="domain.Artwork" length="4">
+  <void index="0">
+   <object class="domain.Artwork">
+    <void property="author">
+     <string> Vincent van Gogh</string>
+    </void>
+    <void property="country">
+     <string>French</string>
+    </void>
+    <void property="direction">
+     <string>Impressionism</string>
+    </void>
+    <void property="name">
+     <string>Sunflowers</string>
+    </void>
+    <void property="pathartwork">
+     <string>https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Vincent_Willem_van_Gogh_127.jpg/800px-Vincent_Willem_van_Gogh_127.jpg</string>
+    </void>
+    <void property="price">
+     <int>3000000</int>
+    </void>
+    <void property="size">
+     <string>92x73</string>
+    </void>
+    <void property="technique">
+     <string>Oil on canvas</string>
+    </void>
+    <void property="genre">
+     <string>Still life</string>
+    </void>
+   </object>
+  </void>
+  <void index="1">
+   <object class="domain.Artwork">
+    <void property="author">
+     <string>Vincent van Gogh</string>
+    </void>
+    <void property="country">
+     <string>French</string>
+    </void>
+    <void property="direction">
+     <string>Post-Impressionism</string>
+    </void>
+    <void property="name">
+     <string>The Red Vineyard</string>
+    </void>
+    <void property="pathartwork">
+     <string>https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/Red_vineyards.jpg/800px-Red_vineyards.jpg</string>
+    </void>
+    <void property="price">
+     <int>70000000</int>
+    </void>
+    <void property="size">
+     <string>75x73</string>
+    </void>
+    <void property="technique">
+     <string>Oil on canvas</string>
+    </void>
+    <void property="genre">
+     <string>Landscape</string>
+    </void>
+   </object>
+  </void>
+  <void index="2">
+   <object class="domain.Artwork">
+    <void property="author">
+     <string> Vincent van Gogh</string>
+    </void>
+    <void property="country">
+     <string>Frence</string>
+    </void>
+    <void property="direction">
+     <string>Post-Impressionism</string>
+    </void>
+    <void property="name">
+     <string>Caf? Terrace at Night</string>
+    </void>
+    <void property="pathartwork">
+     <string>https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/Van_Gogh_-_Terrasse_des_Caf%C3%A9s_an_der_Place_du_Forum_in_Arles_am_Abend1.jpeg/800px-Van_Gogh_-_Terrasse_des_Caf%C3%A9s_an_der_Place_du_Forum_in_Arles_am_Abend1.jpeg</string>
+    </void>
+    <void property="price">
+     <int>64789900</int>
+    </void>
+    <void property="size">
+     <string>80x60cm</string>
+    </void>
+    <void property="technique">
+     <string>Oil on canvas</string>
+    </void>
+        <void property="genre">
+     <string>Landscape</string>
+    </void>
+   </object>
+  </void>
+  <void index="3">
+   <object class="domain.Artwork">
+    <void property="author">
+     <string>Vincent van Gogh</string>
+    </void>
+    <void property="country">
+     <string>Frence</string>
+    </void>
+    <void property="direction">
+     <string>Post-Impressionism</string>
+    </void>
+    <void property="name">
+     <string>The Starry Night</string>
+    </void>
+    <void property="pathartwork">
+     <string>https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/800px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg</string>
+    </void>
+    <void property="price">
+     <int>59484900</int>
+    </void>
+    <void property="size">
+     <string>73x92cm</string>
+    </void>
+    <void property="technique">
+     <string>Oil on canvas</string>
+    </void>
+        <void property="genre">
+     <string>Landscape</string>
+    </void>
+   </object>
+  </void>
+ </array>
+</java>

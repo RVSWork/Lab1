@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<java version="1.8.0_60" class="java.beans.XMLDecoder">
+ <array class="domain.Artwork" length="3">
+  <void index="0">
+   <object class="domain.Artwork">
+    <void property="author">
+     <string>Gustav Klimt</string>
+    </void>
+    <void property="country">
+     <string>Imperial Austrian</string>
+    </void>
+    <void property="direction">
+     <string>Symbolism</string>
+    </void>
+    <void property="name">
+     <string>The Kiss</string>
+    </void>
+    <void property="genre">
+     <string>Portrait</string>
+    </void>
+
+    <void property="pathartwork">
+     <string>https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/The_Kiss_-_Gustav_Klimt_-_Google_Cultural_Institute.jpg/800px-The_Kiss_-_Gustav_Klimt_-_Google_Cultural_Institute.jpg</string>
+    </void>
+    <void property="price">
+     <int>67435834</int>
+    </void>
+    <void property="size">
+     <string>180x180cm</string>
+    </void>
+    <void property="technique">
+     <string>oil and gold leaf on canvas</string>
+    </void>
+   </object>
+  </void>
+  <void index="1">
+   <object class="domain.Artwork">
+    <void property="author">
+     <string>Gustav Klimt</string>
+    </void>
+    <void property="country">
+     <string>Imperial Austrian</string>
+    </void>
+    <void property="direction">
+     <string>Symbolism</string>
+    </void>
+    <void property="name">
+     <string>Judith and the Head of Holofernes</string>
+     </void>
+    <void property="genre">
+     <string>Portrait</string>
+    
+    </void>
+    <void property="pathartwork">
+     <string>https://upload.wikimedia.org/wikipedia/commons/thumb/9/92/Gustav_Klimt_039.jpg/320px-Gustav_Klimt_039.jpg</string>
+    </void>
+    <void property="price">
+     <int>54839000</int>
+    </void>
+    <void property="size">
+     <string>84x42cm</string>
+    </void>
+    <void property="technique">
+     <string>Oil on canvas</string>
+    </void>
+   </object>
+  </void>
+  <void index="2">
+   <object class="domain.Artwork">
+    <void property="author">
+     <string>Gustav Klimt</string>
+    </void>
+    <void property="country">
+     <string>Imperial Austrian</string>
+    </void>
+    <void property="direction">
+     <string>Symbolism</string>
+    </void>
+    <void property="name">
+     <string>Portrait of Adele Bloch-Bauer I</string>
+     </void>
+    <void property="genre">
+     <string>Portrait</string>
+    </void>
+    
+    <void property="pathartwork">
+     <string>https://upload.wikimedia.org/wikipedia/commons/thumb/8/84/Gustav_Klimt_046.jpg/800px-Gustav_Klimt_046.jpg</string>
+    </void>
+    <void property="price">
+     <int>787594300</int>
+    </void>
+    <void property="size">
+     <string>138x138</string>
+    </void>
+    <void property="technique">
+     <string>Oil, silver, and gold on canvas</string>
+    </void>
+   </object>
+  </void>
+ </array>
+</java>
+

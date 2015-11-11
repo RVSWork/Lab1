@@ -1,0 +1,89 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : 23.10.2015, 18:48:10
+    Author     : SofySmo
+*/
+
+h1
+{ 
+    font-family: 'Franklin Gothic Demi Cond', arial;
+    size:20px;
+}
+body{
+    //display: inline-block;
+    margin: 0;
+    //width: auto;
+}
+#hat{
+    display: inline-block;
+
+    margin-right: 10px;
+    //margin-bottom: 100px;
+    background:black;
+    width: 100%;
+    height: 100px;
+    color:white;
+    //width: 780px;
+}
+#hat h1{
+    margin-left: 100px;
+}
+#right_block{
+    float:right;
+    margin-right: 50px;
+}
+#fon_top_menu{
+    //margin-top: 0px;
+    padding-top: 5px;
+    background:black;
+    border-bottom: 5px solid #ac7fa8;
+}
+li.navigation-bar-item{
+    
+    margin: 1px;
+    margin-bottom: 0px;
+}
+.navigerion-bar-link{
+    color:black;
+}
+ a.navigerion-bar-link:visited {
+    color: white; /* Цвет посещенных ссылок */
+   }
+ a.navigerion-bar-link:active {
+    color:black; /* Цвет активных ссылок */
+ }
+  a.navigerion-bar-link:hover{
+    color:black; /* Цвет активных ссылок */
+ }
+ 
+ .navigerion-bar-span{
+    border-radius: 5px;
+    border-bottom-right-radius: 0px;
+    border-bottom-left-radius: 0px;
+    border: 1px solid gray;
+    border-bottom: 0px;
+    padding: 5px;
+    margin: 2px;
+    margin-bottom: 0px;
+}
+.navigerion-bar-span:active
+{
+    background: white;
+}
+.navigerion-bar-span:hover{
+    background:white;
+}
+ ul.horizontal_list{
+    margin: 0; /* Обнуляем значение отступов */
+    padding: 4px; /* Значение полей */
+   }
+ul.horizontal_list li{
+    display: inline; /* Отображать как строчный элемент */   
+}
+a{
+    text-decoration: none;
+}
